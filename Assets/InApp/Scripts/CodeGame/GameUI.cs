@@ -14,10 +14,27 @@ public class GameUI : Singleton<GameUI>
 
     public GameObject lose;
     public GameObject win;
+    public Transform randSpawn;
+
+    public GameObject[] rand;
 
     void Start()
     {
-        currentState = StateGame.Pause;
+        currentState = StateGame.Playing;
+
+        RandomGame();
+    }
+
+    private void RandomGame()
+    {
+        Instantiate(rand[Random.Range(0, rand.Length)], randSpawn);
+
+        checkers = GetComponentsInChildren<Checker>();
+
+        for (int i = 0; i < checkers.Length; i++)
+        {
+            checkers[i].Rand();
+        }
     }
 
     public void ExitGame()
@@ -57,5 +74,45 @@ public class GameUI : Singleton<GameUI>
         }
 
         SceneManager.LoadScene("Game");
+    }
+
+    private Checker[] checkers;
+
+    public void Check()
+    {
+        if (CheckWin())
+        {
+            ShowWin();
+        }
+    }
+
+    public bool CheckWin()
+    {
+        for (int i = 0; i < checkers.Length; i++)
+        {
+            if (!checkers[i].CheckTrue())
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public void Hint()
+    {
+        if (GameDataManager.Instance.playerData.intDiamond >= 10)
+        {
+            GameDataManager.Instance.playerData.SubDiamond(10);
+
+            for (int i = 0; i < checkers.Length; i++)
+            {
+                if (!checkers[i].CheckTrue())
+                {
+                    checkers[i].Hint();
+                    return;
+                }
+            }
+        }
     }
 }
